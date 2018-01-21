@@ -31,21 +31,8 @@ app.config(function($routeProvider) {
 });
 
 app.controller("imgCtrl", function($scope, $routeParams, $http) {
-    function Label() {
-      this.class = "";
-    }
+    
 
-    function Point(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-
-    function Shape() {
-      this.points = new Array();
-      this.label = new Label();
-    }
-
-    var paint;
 
 
     $scope.img = $routeParams.img;
@@ -61,6 +48,43 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     }
     $scope.dir = split_dir_img($scope.img)
     $scope.img_url = "/api/img" + $scope.img
+
+
+    $scope.x = ''
+    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'], 'attributes': ['Buoy', 'STC', 'Dock']} // Test default
+    $http.get('/api/template' + $scope.dir).then(
+    function success(res) {
+        // $scope.template = res.data
+        if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
+        console.log($scope.template)
+    },
+    function error(res) {
+        console.warn('could not get template', res.status, res.data)
+    })
+
+    function toObject(arr) {
+      var dict = {};
+      for (var i = 0; i < arr.length; ++i)
+        dict[arr[i]] = "";
+      return dict;
+    }
+
+    var template_arr = []
+    for (x in $scope.template) {
+        template_arr.push(x);
+    }
+    function Point(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    function Shape() {
+      this.points = new Array();
+      this.label = toObject(template_arr);
+    }
+
+    var paint;
+
     $scope.old_label = {}
     $scope.label = new Array();
     $scope.label.push(new Shape());
@@ -78,17 +102,7 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         console.warn('could not get label', res.status, res.data)
     })
 
-    $scope.x = ''
-    $scope.template = {'classes': ['Buoy', 'STC', 'Dock'] } // Test default
-    $http.get('/api/template' + $scope.dir).then(
-    function success(res) {
-        $scope.template = res.data
-        if ($scope.template['classes'] == undefined) $scope.template['classes'] = []
-        console.log($scope.template)
-    },
-    function error(res) {
-        console.warn('could not get template', res.status, res.data)
-    })
+
 
     $scope.save = function() {
         $http.post("/api/label" + $scope.img, $scope.label.slice(0,-1)).then(
@@ -118,8 +132,9 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
     var context;
     var done_drawing = false;
 
-    $('#templates').change(function() {
-      $scope.label[$scope.label.length-1].label.class = $('#templates').find(":selected").text();
+    $('#templates.classes').change(function() {
+      $scope.label[$scope.label.length-1].label['classes'] = $('#templates').find(":selected").text();
+      console.log('temp', $('#templates.classes').find(":selected").text())
     });
 
     function prepare() {
@@ -254,7 +269,8 @@ app.controller("imgCtrl", function($scope, $routeParams, $http) {
         //     return false;
         //   }
         // });
-        return $scope.label[currentShape].label.class;
+        console.log("ayy", $scope.label[currentShape].label)
+        return $scope.label[currentShape].label['class'];
     }
 
     // Check if two points  are close to each other

@@ -9,9 +9,8 @@
         <canvas id="canvas_back"></canvas>
     </div>
     <div id="tools">
-        <div class="form-group">
-            <select class="custom-select" id="templates" ng-model='x' ng-options="class for class in template['classes']">
-            </select>
+        <div class="form-group" ng-repeat="t in template">
+            <select class="custom-select" id="templates.($class)" ng-model='x' ng-options="class for class in t"> </select>
         </div>
         <button class="btn btn-success" ng-click="save()">Save</button>
         <button class="btn btn-danger" ng-click="reset()">Reset</button>
